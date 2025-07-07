@@ -1,0 +1,141 @@
+Here’s a full Replit project content plan to help you quickly build and test your prototype for the WeSpark Certificate Platform. We’ll break it down into:
+
+✅ 1. Project Structure
+Use a Next.js or Express.js + React stack on Replit with the following structure (simplified):
+
+bash
+Copy
+Edit
+/client
+  └── /components
+  └── /pages
+/server
+  └── /controllers
+  └── /models
+  └── /routes
+  └── /utils
+/public
+  └── /certificates
+  └── /assets
+/database (SQLite or Supabase client)
+/.env
+index.js
+✅ 2. User Types & Permissions
+Role	Access Level
+Graduate	Personal view & download only
+Verifier	Read-only verification, no login
+Admin	Full access to users, courses, uploads, certificate generator
+
+✅ 3. Key Features per User
+🎓 Graduate
+Email-based magic login (passwordless via Supabase or Clerk)
+
+Dashboard showing:
+
+Completed courses
+
+Certificate download (PDF with QR)
+
+"Add to LinkedIn" button (prefill URL)
+
+Course materials download
+
+Profile edit (email, password, name)
+
+🕵️ Verifier
+/verify route
+
+Input: Certificate number
+
+Output:
+
+Student Name
+
+Course Title
+
+Date Issued
+
+Description
+
+WeSpark “Valid” seal graphic
+
+🛠 Admin
+Admin login (basic auth or admin email check)
+
+User management: View/update students
+
+Course creation & editing
+
+Import graduates via CSV (CSV template: name, email, date, course name)
+
+Auto-generate PDF diplomas with:
+
+Name, course, date, QR (linking to /verify/:cert-id)
+
+Save in /public/certificates
+
+✅ 4. PDF Generator (Certificate)
+Use something like pdf-lib or puppeteer with an HTML template:
+
+Dynamic injection of name, course, date
+
+Add QR code (use qrcode npm package)
+
+Save PDF to /public/certificates/:filename.pdf
+
+✅ 5. LinkedIn Integration
+Use LinkedIn Add Certification link:
+
+Pre-fill using:
+
+url
+Copy
+Edit
+https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME
+&name=AI+Design+Sprint+Bootcamp
+&organizationName=WeSpark
+&issueYear=2025
+&issueMonth=6
+&certUrl=https://wespark.io/verify/XYZ123
+&certId=XYZ123
+✅ 6. Tech Stack Suggestions
+Functionality	Suggested Tools
+Auth	Supabase / Clerk
+Backend	Express.js
+Frontend	React.js / Next.js
+DB	SQLite (for Replit) or Supabase (for remote)
+PDF + QR	pdf-lib / puppeteer + qrcode
+File Uploads	Store in public/ or Supabase Storage
+Styling	Tailwind CSS (quick & clean)
+
+✅ 7. Sample MVP Routes
+/dashboard – User
+GET /api/user/courses
+
+GET /api/user/certificate/:courseId
+
+POST /api/user/update-profile
+
+/verify – Public
+GET /api/verify/:certId
+
+/admin – Admin panel
+GET /api/admin/users
+
+POST /api/admin/upload-csv
+
+POST /api/admin/generate-pdfs
+
+POST /api/admin/courses
+
+✅ 8. MVP Deliverables for Replit Prototype
+You can start small and scale up. MVP suggestions:
+
+ Public certificate validation
+
+ Graduate dashboard with 1 fake course
+
+ Admin CSV upload & PDF generator with QR
+
+ LinkedIn prefill button
+
