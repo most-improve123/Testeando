@@ -228,8 +228,16 @@ export default function Admin() {
                         <tr key={user.id} className="hover:bg-neutral-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-primary">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                user.role === 'admin' 
+                                  ? 'bg-black' 
+                                  : 'bg-[#FCD307]'
+                              }`}>
+                                <span className={`text-sm font-medium ${
+                                  user.role === 'admin' 
+                                    ? 'text-[#FCD307]' 
+                                    : 'text-black'
+                                }`}>
                                   {user.name.split(' ').map(n => n[0]).join('')}
                                 </span>
                               </div>
