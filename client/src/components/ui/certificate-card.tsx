@@ -50,15 +50,28 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
 
   return (
     <Card className="border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <i className={`${getIconClass(certificate.course.icon)} text-primary text-lg`} />
+      <CardContent className="p-0">
+        {certificate.course.thumbnail && (
+          <div className="relative h-32 w-full">
+            <img 
+              src={certificate.course.thumbnail} 
+              alt={certificate.course.title}
+              className="w-full h-full object-cover rounded-t-lg"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
           </div>
-          <Badge variant="secondary" className="bg-secondary-green/10 text-secondary-green">
-            Completed
-          </Badge>
-        </div>
+        )}
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <i className={`${getIconClass(certificate.course.icon)} text-primary text-lg`} />
+            </div>
+            <Badge variant="secondary" className="bg-secondary-green/10 text-secondary-green">
+              Completed
+            </Badge>
+          </div>
         
         <h3 className="text-lg font-semibold text-neutral-800 mb-2">
           {certificate.course.title}
@@ -91,6 +104,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
           >
             <img src={linkedinIcon} alt="LinkedIn" className="h-6 w-6" />
           </Button>
+        </div>
         </div>
       </CardContent>
     </Card>

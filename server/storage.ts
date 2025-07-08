@@ -71,6 +71,7 @@ export class MemStorage implements IStorage {
         description: "Advanced AI design methodologies and sprint techniques",
         duration: 16,
         icon: "fas fa-code",
+        thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop",
         createdAt: new Date(),
       },
       {
@@ -79,6 +80,7 @@ export class MemStorage implements IStorage {
         description: "Core concepts and practical applications of ML",
         duration: 24,
         icon: "fas fa-brain",
+        thumbnail: "https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400&h=200&fit=crop",
         createdAt: new Date(),
       },
       {
@@ -87,6 +89,7 @@ export class MemStorage implements IStorage {
         description: "User-centered design methodologies and best practices",
         duration: 8,
         icon: "fas fa-palette",
+        thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=200&fit=crop",
         createdAt: new Date(),
       },
     ];

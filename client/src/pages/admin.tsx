@@ -22,7 +22,8 @@ export default function Admin() {
     title: "",
     description: "",
     duration: "",
-    icon: "fas fa-code"
+    icon: "fas fa-code",
+    thumbnail: ""
   });
   const { toast } = useToast();
 
@@ -165,7 +166,8 @@ export default function Admin() {
       title: "",
       description: "",
       duration: "",
-      icon: "fas fa-code"
+      icon: "fas fa-code",
+      thumbnail: ""
     });
     setEditingCourse(null);
     setSelectedFile(null);
@@ -177,7 +179,8 @@ export default function Admin() {
       title: course.title,
       description: course.description,
       duration: course.duration.toString(),
-      icon: course.icon
+      icon: course.icon,
+      thumbnail: course.thumbnail || ""
     });
   };
 
@@ -186,7 +189,8 @@ export default function Admin() {
       title: courseFormData.title,
       description: courseFormData.description,
       duration: parseInt(courseFormData.duration),
-      icon: courseFormData.icon
+      icon: courseFormData.icon,
+      thumbnail: courseFormData.thumbnail || null
     };
 
     if (editingCourse) {
@@ -427,6 +431,50 @@ export default function Admin() {
                         />
                       </div>
 
+                      <div>
+                        <Label htmlFor="thumbnail">Thumbnail Image URL</Label>
+                        <Input
+                          id="thumbnail"
+                          value={courseFormData.thumbnail}
+                          onChange={(e) => setCourseFormData({...courseFormData, thumbnail: e.target.value})}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                        {courseFormData.thumbnail && (
+                          <div className="mt-2">
+                            <img 
+                              src={courseFormData.thumbnail} 
+                              alt="Course thumbnail preview" 
+                              className="w-32 h-16 object-cover rounded border"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="thumbnail">Thumbnail Image URL</Label>
+                        <Input
+                          id="thumbnail"
+                          value={courseFormData.thumbnail}
+                          onChange={(e) => setCourseFormData({...courseFormData, thumbnail: e.target.value})}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                        {courseFormData.thumbnail && (
+                          <div className="mt-2">
+                            <img 
+                              src={courseFormData.thumbnail} 
+                              alt="Course thumbnail preview" 
+                              className="w-32 h-16 object-cover rounded border"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
                       <div className="border-t pt-6">
                         <h3 className="text-lg font-semibold mb-4">Import Students to Course</h3>
                         <div className="space-y-4">
@@ -502,13 +550,26 @@ export default function Admin() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {courses?.map((course) => (
                     <Card key={course.id} className="border border-neutral-200 hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <i className={`${course.icon} text-primary`} />
+                      <CardContent className="p-0">
+                        {course.thumbnail && (
+                          <div className="relative h-32 w-full">
+                            <img 
+                              src={course.thumbnail} 
+                              alt={course.title}
+                              className="w-full h-full object-cover rounded-t-lg"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                           </div>
-                          <div className="flex space-x-2">
-                            <Dialog>
+                        )}
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <i className={`${course.icon} text-primary`} />
+                            </div>
+                            <div className="flex space-x-2">
+                              <Dialog>
                               <DialogTrigger asChild>
                                 <Button variant="ghost" size="sm" onClick={() => handleEditCourse(course)}>
                                   <Edit className="h-4 w-4" />
@@ -639,12 +700,13 @@ export default function Admin() {
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </div>
-                        </div>
-                        <h3 className="font-semibold text-neutral-800 mb-2">{course.title}</h3>
-                        <p className="text-sm text-neutral-600 mb-3">{course.description}</p>
-                        <div className="flex items-center justify-between text-sm text-neutral-500">
-                          <span>{course.duration} hours</span>
-                          <span>Active</span>
+                          </div>
+                          <h3 className="font-semibold text-neutral-800 mb-2">{course.title}</h3>
+                          <p className="text-sm text-neutral-600 mb-3">{course.description}</p>
+                          <div className="flex items-center justify-between text-sm text-neutral-500">
+                            <span>{course.duration} hours</span>
+                            <span>Active</span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

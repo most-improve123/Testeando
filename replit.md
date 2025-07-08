@@ -24,7 +24,7 @@ WeSpark is a certificate management platform built with a modern full-stack arch
 
 ### Database Schema
 - **Users**: Email-based authentication with role-based access (graduate/admin)
-- **Courses**: Course information with titles, descriptions, and duration
+- **Courses**: Course information with titles, descriptions, duration, and thumbnail images
 - **Certificates**: Links users to courses with unique certificate IDs
 - **Magic Links**: Temporary authentication tokens with expiration
 
@@ -103,6 +103,7 @@ WeSpark is a certificate management platform built with a modern full-stack arch
 - **Connection**: Serverless PostgreSQL via Neon
 
 ## Changelog
+- July 08, 2025. Added course thumbnail support with admin editing capabilities
 - July 07, 2025. Initial setup
 
 ## User Preferences

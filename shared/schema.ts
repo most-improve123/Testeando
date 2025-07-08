@@ -17,6 +17,7 @@ export const courses = pgTable("courses", {
   description: text("description").notNull(),
   duration: integer("duration").notNull(), // in hours
   icon: text("icon").notNull().default("fas fa-book"),
+  thumbnail: text("thumbnail"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
