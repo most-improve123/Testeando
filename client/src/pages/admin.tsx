@@ -17,6 +17,13 @@ import { queryClient } from "@/lib/queryClient";
 export default function Admin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [courseFormData, setCourseFormData] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    icon: "fas fa-code"
+  });
   const { toast } = useToast();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -96,6 +103,44 @@ export default function Admin() {
     },
   });
 
+  const createCourseMutation = useMutation({
+    mutationFn: api.createCourse,
+    onSuccess: () => {
+      toast({
+        title: "Course Created",
+        description: "Course has been successfully created.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      resetCourseForm();
+    },
+    onError: () => {
+      toast({
+        title: "Create Failed",
+        description: "Failed to create course.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateCourseMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateCourse(id, data),
+    onSuccess: () => {
+      toast({
+        title: "Course Updated",
+        description: "Course has been successfully updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      resetCourseForm();
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update course.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -113,6 +158,42 @@ export default function Admin() {
       return;
     }
     importCsvMutation.mutate(selectedFile);
+  };
+
+  const resetCourseForm = () => {
+    setCourseFormData({
+      title: "",
+      description: "",
+      duration: "",
+      icon: "fas fa-code"
+    });
+    setEditingCourse(null);
+    setSelectedFile(null);
+  };
+
+  const handleEditCourse = (course: any) => {
+    setEditingCourse(course);
+    setCourseFormData({
+      title: course.title,
+      description: course.description,
+      duration: course.duration.toString(),
+      icon: course.icon
+    });
+  };
+
+  const handleSaveCourse = () => {
+    const courseData = {
+      title: courseFormData.title,
+      description: courseFormData.description,
+      duration: parseInt(courseFormData.duration),
+      icon: courseFormData.icon
+    };
+
+    if (editingCourse) {
+      updateCourseMutation.mutate({ id: editingCourse.id, data: courseData });
+    } else {
+      createCourseMutation.mutate(courseData);
+    }
   };
 
   const filteredUsers = users?.filter(user => 
@@ -169,11 +250,10 @@ export default function Admin() {
 
       {/* Admin Tabs */}
       <Tabs defaultValue="students" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="certificates">Certificates</TabsTrigger>
-          <TabsTrigger value="import">Import</TabsTrigger>
         </TabsList>
 
         {/* Students Tab */}
@@ -293,10 +373,127 @@ export default function Admin() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-neutral-800">Course Management</h2>
-                <Button className="bg-primary hover:bg-primary/90 text-white">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Course
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setEditingCourse(null)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Course
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Create New Course</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="title">Course Title</Label>
+                          <Input
+                            id="title"
+                            value={courseFormData.title}
+                            onChange={(e) => setCourseFormData({...courseFormData, title: e.target.value})}
+                            placeholder="Enter course title"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="duration">Duration (hours)</Label>
+                          <Input
+                            id="duration"
+                            type="number"
+                            value={courseFormData.duration}
+                            onChange={(e) => setCourseFormData({...courseFormData, duration: e.target.value})}
+                            placeholder="24"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="description">Description</Label>
+                        <Input
+                          id="description"
+                          value={courseFormData.description}
+                          onChange={(e) => setCourseFormData({...courseFormData, description: e.target.value})}
+                          placeholder="Enter course description"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="icon">Icon Class</Label>
+                        <Input
+                          id="icon"
+                          value={courseFormData.icon}
+                          onChange={(e) => setCourseFormData({...courseFormData, icon: e.target.value})}
+                          placeholder="fas fa-code"
+                        />
+                      </div>
+
+                      <div className="border-t pt-6">
+                        <h3 className="text-lg font-semibold mb-4">Import Students to Course</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <Label>CSV File Upload</Label>
+                            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center">
+                              <Upload className="mx-auto h-6 w-6 text-neutral-400 mb-2" />
+                              <p className="text-sm text-neutral-600 mb-2">
+                                Upload CSV with: name, email, completion_date
+                              </p>
+                              <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileUpload}
+                                className="hidden"
+                                id="csvUploadCreate"
+                              />
+                              <Label htmlFor="csvUploadCreate" className="cursor-pointer">
+                                <Button type="button" variant="outline" size="sm">
+                                  Choose File
+                                </Button>
+                              </Label>
+                              {selectedFile && (
+                                <p className="text-xs text-neutral-500 mt-1">
+                                  Selected: {selectedFile.name}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-neutral-50 rounded-md p-3">
+                            <p className="text-xs font-medium text-neutral-700 mb-1">CSV Format:</p>
+                            <code className="text-xs text-neutral-600">
+                              name,email,completion_date<br/>
+                              John Doe,john@example.com,2025-01-15
+                            </code>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <Button variant="outline" onClick={resetCourseForm}>
+                          Cancel
+                        </Button>
+                        {selectedFile && (
+                          <Button 
+                            onClick={handleImport}
+                            disabled={importCsvMutation.isPending}
+                            variant="outline"
+                          >
+                            {importCsvMutation.isPending ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                            Import CSV
+                          </Button>
+                        )}
+                        <Button 
+                          onClick={handleSaveCourse}
+                          disabled={createCourseMutation.isPending}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          {createCourseMutation.isPending ? 
+                            <LoadingSpinner size="sm" className="mr-2" /> : null}
+                          Create Course
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               {coursesLoading ? (
@@ -311,9 +508,128 @@ export default function Admin() {
                             <i className={`${course.icon} text-primary`} />
                           </div>
                           <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => handleEditCourse(course)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    {editingCourse ? 'Edit Course' : 'Create Course'}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-6">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <Label htmlFor="title">Course Title</Label>
+                                      <Input
+                                        id="title"
+                                        value={courseFormData.title}
+                                        onChange={(e) => setCourseFormData({...courseFormData, title: e.target.value})}
+                                        placeholder="Enter course title"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="duration">Duration (hours)</Label>
+                                      <Input
+                                        id="duration"
+                                        type="number"
+                                        value={courseFormData.duration}
+                                        onChange={(e) => setCourseFormData({...courseFormData, duration: e.target.value})}
+                                        placeholder="24"
+                                      />
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <Label htmlFor="description">Description</Label>
+                                    <Input
+                                      id="description"
+                                      value={courseFormData.description}
+                                      onChange={(e) => setCourseFormData({...courseFormData, description: e.target.value})}
+                                      placeholder="Enter course description"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label htmlFor="icon">Icon Class</Label>
+                                    <Input
+                                      id="icon"
+                                      value={courseFormData.icon}
+                                      onChange={(e) => setCourseFormData({...courseFormData, icon: e.target.value})}
+                                      placeholder="fas fa-code"
+                                    />
+                                  </div>
+
+                                  <div className="border-t pt-6">
+                                    <h3 className="text-lg font-semibold mb-4">Import Students to Course</h3>
+                                    <div className="space-y-4">
+                                      <div>
+                                        <Label>CSV File Upload</Label>
+                                        <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center">
+                                          <Upload className="mx-auto h-6 w-6 text-neutral-400 mb-2" />
+                                          <p className="text-sm text-neutral-600 mb-2">
+                                            Upload CSV with: name, email, completion_date
+                                          </p>
+                                          <input
+                                            type="file"
+                                            accept=".csv"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            id="csvUploadDialog"
+                                          />
+                                          <Label htmlFor="csvUploadDialog" className="cursor-pointer">
+                                            <Button type="button" variant="outline" size="sm">
+                                              Choose File
+                                            </Button>
+                                          </Label>
+                                          {selectedFile && (
+                                            <p className="text-xs text-neutral-500 mt-1">
+                                              Selected: {selectedFile.name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="bg-neutral-50 rounded-md p-3">
+                                        <p className="text-xs font-medium text-neutral-700 mb-1">CSV Format:</p>
+                                        <code className="text-xs text-neutral-600">
+                                          name,email,completion_date<br/>
+                                          John Doe,john@example.com,2025-01-15
+                                        </code>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-end space-x-3">
+                                    <Button variant="outline" onClick={resetCourseForm}>
+                                      Cancel
+                                    </Button>
+                                    {selectedFile && (
+                                      <Button 
+                                        onClick={handleImport}
+                                        disabled={importCsvMutation.isPending}
+                                        variant="outline"
+                                      >
+                                        {importCsvMutation.isPending ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                                        Import CSV
+                                      </Button>
+                                    )}
+                                    <Button 
+                                      onClick={handleSaveCourse}
+                                      disabled={createCourseMutation.isPending || updateCourseMutation.isPending}
+                                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    >
+                                      {(createCourseMutation.isPending || updateCourseMutation.isPending) ? 
+                                        <LoadingSpinner size="sm" className="mr-2" /> : null}
+                                      {editingCourse ? 'Update Course' : 'Create Course'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -399,63 +715,7 @@ export default function Admin() {
           </Card>
         </TabsContent>
 
-        {/* Import Tab */}
-        <TabsContent value="import">
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-neutral-800 mb-6">Import Students</h2>
-              <div className="max-w-2xl">
-                <div className="mb-6">
-                  <Label className="text-sm font-medium text-neutral-700 mb-2">CSV File Upload</Label>
-                  <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-                    <Upload className="mx-auto h-8 w-8 text-neutral-400 mb-3" />
-                    <p className="text-neutral-600 mb-2">Drop your CSV file here or click to browse</p>
-                    <p className="text-sm text-neutral-500 mb-3">
-                      Supported format: name, email, course, completion_date
-                    </p>
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="csvUpload"
-                    />
-                    <Label htmlFor="csvUpload" className="cursor-pointer">
-                      <Button type="button" className="bg-primary hover:bg-primary/90 text-white">
-                        Choose File
-                      </Button>
-                    </Label>
-                    {selectedFile && (
-                      <p className="text-sm text-neutral-600 mt-2">
-                        Selected: {selectedFile.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-neutral-700 mb-3">CSV Template</h3>
-                  <div className="bg-neutral-50 rounded-md p-4 font-mono text-sm text-neutral-700">
-                    <div className="mb-2">name,email,course,completion_date</div>
-                    <div className="text-neutral-500">John Doe,john@example.com,AI Design Sprint Bootcamp,2025-01-15</div>
-                  </div>
-                  <Button variant="ghost" className="mt-3 text-primary hover:text-primary/80">
-                    Download Template
-                  </Button>
-                </div>
-                
-                <Button 
-                  onClick={handleImport}
-                  disabled={!selectedFile || importCsvMutation.isPending}
-                  className="bg-primary hover:bg-primary/90 text-white"
-                >
-                  {importCsvMutation.isPending ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                  Process Import
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
       </Tabs>
     </main>
   );
