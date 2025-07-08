@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Linkedin } from "lucide-react";
+import { Download } from "lucide-react";
+import linkedinIcon from "@assets/image_1752015253525.png";
 import { CertificateWithDetails, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -88,7 +89,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
             className="border-neutral-200 hover:bg-neutral-50"
             onClick={handleLinkedInShare}
           >
-            <Linkedin className="h-4 w-4 text-blue-600" />
+            <img src={linkedinIcon} alt="LinkedIn" className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>
