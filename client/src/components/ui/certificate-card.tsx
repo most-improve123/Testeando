@@ -89,7 +89,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
             className="border-neutral-200 hover:bg-neutral-50"
             onClick={handleLinkedInShare}
           >
-            <img src={linkedinIcon} alt="LinkedIn" className="h-4 w-4" />
+            <img src={linkedinIcon} alt="LinkedIn" className="h-6 w-6" />
           </Button>
         </div>
       </CardContent>
