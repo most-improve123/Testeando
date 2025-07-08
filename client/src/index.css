@@ -113,3 +113,12 @@
     color: var(--neutral-800);
   }
 }
+
+/* Ensure primary buttons have black text for better contrast */
+.bg-primary, 
+.bg-primary:hover, 
+.bg-primary:focus,
+button[class*="bg-primary"],
+[class*="bg-primary"] {
+  color: black !important;
+}
