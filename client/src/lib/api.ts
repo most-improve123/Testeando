@@ -177,7 +177,7 @@ export const api = {
     const params = new URLSearchParams({
       startTask: 'CERTIFICATION_NAME',
       name: certificate.course.title,
-      organizationName: 'WeSpark',
+      organizationId: '13993759',
       issueYear: new Date(certificate.completionDate).getFullYear().toString(),
       issueMonth: (new Date(certificate.completionDate).getMonth() + 1).toString(),
       certUrl: `${window.location.origin}/verify/${certificate.certificateId}`,
