@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { StatsCard } from "@/components/ui/stats-card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -18,6 +18,7 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [courseFormData, setCourseFormData] = useState({
     title: "",
     description: "",
@@ -171,6 +172,7 @@ export default function Admin() {
     });
     setEditingCourse(null);
     setSelectedFile(null);
+    setIsDialogOpen(false);
   };
 
   const handleEditCourse = (course: any) => {
@@ -182,6 +184,7 @@ export default function Admin() {
       icon: course.icon,
       thumbnail: course.thumbnail || ""
     });
+    setIsDialogOpen(true);
   };
 
   const handleSaveCourse = () => {
@@ -377,9 +380,12 @@ export default function Admin() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-neutral-800">Course Management</h2>
-                <Dialog>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setEditingCourse(null)}>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => {
+                      setEditingCourse(null);
+                      setIsDialogOpen(true);
+                    }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Create Course
                     </Button>
@@ -516,9 +522,11 @@ export default function Admin() {
                       </div>
 
                       <div className="flex justify-end space-x-3">
-                        <Button variant="outline" onClick={resetCourseForm}>
-                          Cancel
-                        </Button>
+                        <DialogClose asChild>
+                          <Button variant="outline" onClick={resetCourseForm}>
+                            Cancel
+                          </Button>
+                        </DialogClose>
                         {selectedFile && (
                           <Button 
                             onClick={handleImport}
@@ -569,7 +577,7 @@ export default function Admin() {
                               <i className={`${course.icon} text-primary`} />
                             </div>
                             <div className="flex space-x-2">
-                              <Dialog>
+                              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button variant="ghost" size="sm" onClick={() => handleEditCourse(course)}>
                                   <Edit className="h-4 w-4" />
@@ -615,13 +623,38 @@ export default function Admin() {
                                   </div>
 
                                   <div>
-                                    <Label htmlFor="icon">Icon Class</Label>
+                                    <Label htmlFor="icon">Icon Class (FontAwesome)</Label>
                                     <Input
                                       id="icon"
                                       value={courseFormData.icon}
                                       onChange={(e) => setCourseFormData({...courseFormData, icon: e.target.value})}
                                       placeholder="fas fa-code"
                                     />
+                                    <div className="text-xs text-neutral-500 mt-1">
+                                      e.g., fas fa-code, fas fa-brain, fas fa-palette
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <Label htmlFor="thumbnail">Thumbnail Image URL</Label>
+                                    <Input
+                                      id="thumbnail"
+                                      value={courseFormData.thumbnail}
+                                      onChange={(e) => setCourseFormData({...courseFormData, thumbnail: e.target.value})}
+                                      placeholder="https://example.com/image.jpg"
+                                    />
+                                    {courseFormData.thumbnail && (
+                                      <div className="mt-2">
+                                        <img 
+                                          src={courseFormData.thumbnail} 
+                                          alt="Course thumbnail preview" 
+                                          className="w-32 h-16 object-cover rounded border"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      </div>
+                                    )}
                                   </div>
 
                                   <div className="border-t pt-6">
@@ -665,9 +698,11 @@ export default function Admin() {
                                   </div>
 
                                   <div className="flex justify-end space-x-3">
-                                    <Button variant="outline" onClick={resetCourseForm}>
-                                      Cancel
-                                    </Button>
+                                    <DialogClose asChild>
+                                      <Button variant="outline" onClick={resetCourseForm}>
+                                        Cancel
+                                      </Button>
+                                    </DialogClose>
                                     {selectedFile && (
                                       <Button 
                                         onClick={handleImport}
