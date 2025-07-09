@@ -196,7 +196,8 @@ export default function Admin() {
       description: courseFormData.description,
       duration: parseInt(courseFormData.duration),
       icon: courseFormData.icon,
-      thumbnail: courseFormData.thumbnail || null
+      thumbnail: courseFormData.thumbnail || null,
+      certificateBackground: courseFormData.certificateBackground || null
     };
 
     if (editingCourse) {

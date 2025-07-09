@@ -64,7 +64,7 @@ export class MemStorage implements IStorage {
     this.users.set(adminUser.id, adminUser);
 
     // Create sample courses
-    const courses = [
+    const courses: Course[] = [
       {
         id: this.currentCourseId++,
         title: "AI Design Sprint Bootcamp",
@@ -168,6 +168,7 @@ export class MemStorage implements IStorage {
       id: this.currentCourseId++,
       createdAt: new Date(),
       icon: insertCourse.icon || 'fas fa-book',
+      thumbnail: insertCourse.thumbnail || null,
       certificateBackground: insertCourse.certificateBackground || null,
     };
     this.courses.set(course.id, course);

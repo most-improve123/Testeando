@@ -152,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const courses = await storage.getAllCourses();
       res.json(courses);
     } catch (error) {
+      console.error("Error getting courses:", error);
       res.status(500).json({ error: "Failed to get courses" });
     }
   });
@@ -171,6 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/courses", async (req, res) => {
     try {
+      console.log("Creating course with data:", req.body);
       const courseData = {
         ...req.body,
         duration: parseInt(req.body.duration),
@@ -180,6 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const course = await storage.createCourse(validatedData);
       res.status(201).json(course);
     } catch (error) {
+      console.error("Error creating course:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
@@ -221,6 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificates = await storage.getAllCertificates();
       res.json(certificates);
     } catch (error) {
+      console.error("Error getting certificates:", error);
       res.status(500).json({ error: "Failed to get certificates" });
     }
   });
@@ -231,6 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const certificates = await storage.getCertificatesByUserId(userId);
       res.json(certificates);
     } catch (error) {
+      console.error("Error getting user certificates:", error);
       res.status(500).json({ error: "Failed to get user certificates" });
     }
   });
