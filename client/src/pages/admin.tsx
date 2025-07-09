@@ -24,7 +24,8 @@ export default function Admin() {
     description: "",
     duration: "",
     icon: "fas fa-code",
-    thumbnail: ""
+    thumbnail: "",
+    certificateBackground: ""
   });
   const { toast } = useToast();
 
@@ -168,7 +169,8 @@ export default function Admin() {
       description: "",
       duration: "",
       icon: "fas fa-code",
-      thumbnail: ""
+      thumbnail: "",
+      certificateBackground: ""
     });
     setEditingCourse(null);
     setSelectedFile(null);
@@ -182,7 +184,8 @@ export default function Admin() {
       description: course.description,
       duration: course.duration.toString(),
       icon: course.icon,
-      thumbnail: course.thumbnail || ""
+      thumbnail: course.thumbnail || "",
+      certificateBackground: course.certificateBackground || ""
     });
     setIsDialogOpen(true);
   };
@@ -460,19 +463,22 @@ export default function Admin() {
                       </div>
 
                       <div>
-                        <Label htmlFor="thumbnail">Thumbnail Image URL</Label>
+                        <Label htmlFor="certificateBackground">Certificate Background Image URL</Label>
                         <Input
-                          id="thumbnail"
-                          value={courseFormData.thumbnail}
-                          onChange={(e) => setCourseFormData({...courseFormData, thumbnail: e.target.value})}
-                          placeholder="https://example.com/image.jpg"
+                          id="certificateBackground"
+                          value={courseFormData.certificateBackground}
+                          onChange={(e) => setCourseFormData({...courseFormData, certificateBackground: e.target.value})}
+                          placeholder="https://example.com/certificate-background.png"
                         />
-                        {courseFormData.thumbnail && (
+                        <div className="text-xs text-neutral-500 mt-1">
+                          Use a high-quality PNG or JPG background image for certificates
+                        </div>
+                        {courseFormData.certificateBackground && (
                           <div className="mt-2">
                             <img 
-                              src={courseFormData.thumbnail} 
-                              alt="Course thumbnail preview" 
-                              className="w-32 h-16 object-cover rounded border"
+                              src={courseFormData.certificateBackground} 
+                              alt="Certificate background preview" 
+                              className="w-48 h-32 object-cover rounded border"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                               }}
@@ -489,7 +495,7 @@ export default function Admin() {
                             <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center">
                               <Upload className="mx-auto h-6 w-6 text-neutral-400 mb-2" />
                               <p className="text-sm text-neutral-600 mb-2">
-                                Upload CSV with: name, email, completion_date
+                                Upload CSV with: name, email, completion_date, city
                               </p>
                               <input
                                 type="file"
@@ -514,8 +520,8 @@ export default function Admin() {
                           <div className="bg-neutral-50 rounded-md p-3">
                             <p className="text-xs font-medium text-neutral-700 mb-1">CSV Format:</p>
                             <code className="text-xs text-neutral-600">
-                              name,email,completion_date<br/>
-                              John Doe,john@example.com,2025-01-15
+                              name,email,completion_date,city<br/>
+                              John Doe,john@example.com,2025-01-15,New York
                             </code>
                           </div>
                         </div>
@@ -657,6 +663,31 @@ export default function Admin() {
                                     )}
                                   </div>
 
+                                  <div>
+                                    <Label htmlFor="certificateBackground">Certificate Background Image URL</Label>
+                                    <Input
+                                      id="certificateBackground"
+                                      value={courseFormData.certificateBackground}
+                                      onChange={(e) => setCourseFormData({...courseFormData, certificateBackground: e.target.value})}
+                                      placeholder="https://example.com/certificate-background.png"
+                                    />
+                                    <div className="text-xs text-neutral-500 mt-1">
+                                      Use a high-quality PNG or JPG background image for certificates
+                                    </div>
+                                    {courseFormData.certificateBackground && (
+                                      <div className="mt-2">
+                                        <img 
+                                          src={courseFormData.certificateBackground} 
+                                          alt="Certificate background preview" 
+                                          className="w-48 h-32 object-cover rounded border"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
                                   <div className="border-t pt-6">
                                     <h3 className="text-lg font-semibold mb-4">Import Students to Course</h3>
                                     <div className="space-y-4">
@@ -665,7 +696,7 @@ export default function Admin() {
                                         <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center">
                                           <Upload className="mx-auto h-6 w-6 text-neutral-400 mb-2" />
                                           <p className="text-sm text-neutral-600 mb-2">
-                                            Upload CSV with: name, email, completion_date
+                                            Upload CSV with: name, email, completion_date, city
                                           </p>
                                           <input
                                             type="file"
@@ -690,8 +721,8 @@ export default function Admin() {
                                       <div className="bg-neutral-50 rounded-md p-3">
                                         <p className="text-xs font-medium text-neutral-700 mb-1">CSV Format:</p>
                                         <code className="text-xs text-neutral-600">
-                                          name,email,completion_date<br/>
-                                          John Doe,john@example.com,2025-01-15
+                                          name,email,completion_date,city<br/>
+                                          John Doe,john@example.com,2025-01-15,New York
                                         </code>
                                       </div>
                                     </div>

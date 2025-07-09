@@ -171,8 +171,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/courses", async (req, res) => {
     try {
-      const courseData = insertCourseSchema.parse(req.body);
-      const course = await storage.createCourse(courseData);
+      const courseData = {
+        ...req.body,
+        duration: parseInt(req.body.duration),
+        certificateBackground: req.body.certificateBackground || null,
+      };
+      const validatedData = insertCourseSchema.parse(courseData);
+      const course = await storage.createCourse(validatedData);
       res.status(201).json(course);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -185,7 +190,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/courses/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updateData = req.body;
+      const updateData = {
+        ...req.body,
+        duration: req.body.duration ? parseInt(req.body.duration) : undefined,
+        certificateBackground: req.body.certificateBackground || null,
+      };
       const course = await storage.updateCourse(id, updateData);
       res.json(course);
     } catch (error) {
@@ -309,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             for (const row of results) {
               try {
-                const { name, email, course, completion_date } = row;
+                const { name, email, course, completion_date, city } = row;
                 
                 if (!name || !email || !course || !completion_date) {
                   imported.errors.push(`Missing required fields in row: ${JSON.stringify(row)}`);
@@ -341,6 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   userId: user.id,
                   courseId: foundCourse.id,
                   completionDate: new Date(completion_date),
+                  city: city || null,
                 });
                 imported.certificates++;
 

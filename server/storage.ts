@@ -72,6 +72,7 @@ export class MemStorage implements IStorage {
         duration: 16,
         icon: "fas fa-code",
         thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop",
+        certificateBackground: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=842&h=595&fit=crop",
         createdAt: new Date(),
       },
       {
@@ -81,6 +82,7 @@ export class MemStorage implements IStorage {
         duration: 24,
         icon: "fas fa-brain",
         thumbnail: "https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400&h=200&fit=crop",
+        certificateBackground: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=842&h=595&fit=crop",
         createdAt: new Date(),
       },
       {
@@ -90,6 +92,7 @@ export class MemStorage implements IStorage {
         duration: 8,
         icon: "fas fa-palette",
         thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=200&fit=crop",
+        certificateBackground: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=842&h=595&fit=crop",
         createdAt: new Date(),
       },
     ];
@@ -97,6 +100,19 @@ export class MemStorage implements IStorage {
     courses.forEach(course => {
       this.courses.set(course.id, course);
     });
+
+    // Create sample certificate
+    const sampleCertificate: Certificate = {
+      id: this.currentCertificateId++,
+      certificateId: "WSP-2025-001",
+      userId: adminUser.id,
+      courseId: 1,
+      completionDate: new Date('2025-01-15'),
+      city: "Berlin",
+      issuedAt: new Date(),
+      pdfPath: null,
+    };
+    this.certificates.set(sampleCertificate.id, sampleCertificate);
   }
 
   // User operations
@@ -152,6 +168,7 @@ export class MemStorage implements IStorage {
       id: this.currentCourseId++,
       createdAt: new Date(),
       icon: insertCourse.icon || 'fas fa-book',
+      certificateBackground: insertCourse.certificateBackground || null,
     };
     this.courses.set(course.id, course);
     return course;

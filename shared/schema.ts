@@ -18,6 +18,7 @@ export const courses = pgTable("courses", {
   duration: integer("duration").notNull(), // in hours
   icon: text("icon").notNull().default("fas fa-book"),
   thumbnail: text("thumbnail"),
+  certificateBackground: text("certificate_background"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -29,6 +30,7 @@ export const certificates = pgTable("certificates", {
   issuedAt: timestamp("issued_at").defaultNow(),
   completionDate: timestamp("completion_date").notNull(),
   pdfPath: text("pdf_path"),
+  city: text("city"),
 });
 
 export const magicLinks = pgTable("magic_links", {
