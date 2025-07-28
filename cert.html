@@ -1,394 +1,445 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Generador de Certificados</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      padding: 20px;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .tabs {
-      display: flex;
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 20px;
-    }
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      background-color: #1e1e1e;
-      border: 1px solid #bb86fc;
-      cursor: pointer;
-    }
-    .tab.active {
-      background-color: #bb86fc;
-      color: #121212;
-    }
-    .tab-content {
-      display: none;
-      width: 100%;
-      max-width: 600px;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    h1, h2 {
-      color: #bb86fc;
-    }
-    form {
-      background-color: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      width: 100%;
-      max-width: 400px;
-      animation: slideUp 1s;
-    }
-    input[type="text"],
-    input[type="date"],
-    input[type="file"] {
-      width: 95%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #bb86fc;
-      border-radius: 5px;
-      background-color: #2d2d2d;
-      color: #e0e0e0;
-    }
-    button[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      background-color: #bb86fc;
-      color: #121212;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    button[type="submit"]:hover {
-      background-color: #9a67ea;
-    }
-    button {
-      background-color: #bb86fc;
-      color: #121212;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      margin: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #9a67ea;
-    }
-    #certificado {
-      border: 1px solid #bb86fc;
-      padding: 20px;
-      margin-top: 20px;
-      background-color: #1e1e1e;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      width: 100%;
-      max-width: 600px;
-      animation: fadeIn 1.5s;
-    }
-    #certificado h2 {
-      color: #bb86fc;
-    }
-    #certificado p {
-      margin: 10px 0;
-    }
-    .oculto {
-      display: none;
-    }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Generador de Certificados</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        padding: 20px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
       }
-      to {
-        opacity: 1;
+      .tabs {
+        display: flex;
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 20px;
       }
-    }
-    @keyframes slideUp {
-      from {
-        transform: translateY(50px);
-        opacity: 0;
+      .tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        background-color: #1e1e1e;
+        border: 1px solid #bb86fc;
+        cursor: pointer;
       }
-      to {
-        transform: translateY(0);
-        opacity: 1;
+      .tab.active {
+        background-color: #bb86fc;
+        color: #121212;
       }
-    }
-    /* Ajustar el tamaño del código QR en la vista previa */
-    #qr {
-      width: 200px; /* Ajusta el ancho */
-      height: 200px; /* Ajusta la altura */
-    }
-  </style>
-</head>
-<body>
-  <h1>Generador de Certificados</h1>
-  <div class="tabs">
-    <div class="tab active" onclick="openTab('individual')">Individual</div>
-    <div class="tab" onclick="openTab('masivo')">Masivo</div>
-  </div>
-  <div id="individual" class="tab-content active">
-    <form id="formulario">
-      <input type="text" id="nombre" placeholder="Nombre completo" required />
-      <input type="text" id="curso" placeholder="Curso" required />
-      <input type="date" id="fecha" required />
-      <button type="submit">Generar Certificado</button>
-    </form>
-    <div id="certificado" class="oculto">
-      <h2>Certificado Generado</h2>
-      <p><strong>Nombre:</strong> <span id="cNombre"></span></p>
-      <p><strong>Curso:</strong> <span id="cCurso"></span></p>
-      <p><strong>Fecha:</strong> <span id="cFecha"></span></p>
-      <p><strong>ID:</strong> <span id="cID"></span></p>
-      <p><strong>Hash :</strong> <span id="cHash"></span></p>
-      <p><img id="qr" src="" alt="QR de verificación" /></p>
-      <p id="nostrStatus">Publicando en Nostr...</p>
-      <button id="descargarTXT">📄 Descargar TXT</button>
-      <button id="descargarPDF">📄 Descargar PDF</button>
-    </div>
-  </div>
-  <div id="masivo" class="tab-content">
-    <h2>Carga masiva desde CSV</h2>
-    <input type="file" id="csvInput" accept=".csv" />
-    <button onclick="procesarCSV()">📥 Generar ZIP de Certificados</button>
-  </div>
-  <script>
-    function openTab(tabName) {
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-      event.currentTarget.classList.add('active');
-      document.getElementById(tabName).classList.add('active');
-    }
-
-    window.onload = function() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('fecha').value = today;
-    };
-
-    document.getElementById('formulario').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const nombre = document.getElementById('nombre').value;
-      const curso = document.getElementById('curso').value;
-      const fecha = document.getElementById('fecha').value;
-      const id = Math.random().toString(36).substring(2, 10);
-      const texto = `${nombre}|${curso}|${fecha}|${id}`;
-      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      document.getElementById('cNombre').textContent = nombre;
-      document.getElementById('cCurso').textContent = curso;
-      document.getElementById('cFecha').textContent = fecha;
-      document.getElementById('cID').textContent = id;
-      document.getElementById('cHash').textContent = hashHex;
-      const qrUrl = `https://static.wixstatic.com/media/a687f1_054babd862ef4bca96854b866b7ede67~mv2.png`;
-      document.getElementById('qr').src = qrUrl;
-      document.getElementById('certificado').classList.remove('oculto');
-      const nuevoCertificado = { nombre, curso, fecha, id, hash: hashHex };
-      let certificados = JSON.parse(localStorage.getItem('certificados') || '[]');
-      certificados.push(nuevoCertificado);
-      localStorage.setItem('certificados', JSON.stringify(certificados));
-    });
-
-    document.getElementById("descargarTXT").addEventListener("click", function () {
-      const nombre = document.getElementById("cNombre").textContent;
-      const curso = document.getElementById("cCurso").textContent;
-      const fecha = document.getElementById("cFecha").textContent;
-      const id = document.getElementById("cID").textContent;
-      const hash = document.getElementById("cHash").textContent;
-      const contenido = `Nombre: ${nombre}\nCurso: ${curso}\nFecha: ${fecha}\nID: ${id}\nHash: ${hash}`;
-      const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `certificado_${id}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    document.getElementById("descargarPDF").addEventListener("click", async function () {
-      const nombre = document.getElementById("cNombre").textContent;
-      const curso = document.getElementById("cCurso").textContent;
-      const fecha = document.getElementById("cFecha").textContent;
-      const id = document.getElementById("cID").textContent;
-      const hashHex = document.getElementById("cHash").textContent;
-      const qrUrl = document.getElementById("qr").src;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'pt',
-        format: 'A4'
-      });
-      const fondoURL = 'https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg';
-
-      const loadImage = (src) => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "Anonymous";
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = src;
-        });
-      };
-
-      try {
-        const fondo = await loadImage(fondoURL);
-        const qrImage = await loadImage(qrUrl);
-
-        doc.addImage(fondo, 'JPEG', 0, 0, 850, 595);
-
-        doc.setFontSize(35);
-        doc.text(`${curso}`, 200, 130);
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(35);
-        doc.text(`${nombre}`, 230, 190);
-        doc.setTextColor(0, 0, 0);
-        doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(14);
-        const text = "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
-        const maxWidth = 600;
-        const splitText = doc.splitTextToSize(text, maxWidth);
-        doc.text(splitText, 120, 250);
-        doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(14);
-        const text1 = "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
-        const maxWidth1 = 650;
-        const splitText1 = doc.splitTextToSize(text1, maxWidth1);
-        doc.text(splitText1, 100, 310);
-        const text2 = "your skills evolve";
-        const splitText2 = doc.splitTextToSize(text2, maxWidth);
-        doc.text(splitText2, 340, 345);
-        doc.setFontSize(16);
-        doc.text(`Fecha: ${fecha}`, 40, 500);
-        doc.text(`ID: ${id}`, 40, 520);
-        doc.setFontSize(12);
-        doc.text(`Hash: ${hashHex}`, 40, 540);
-
-        // Ajustar el tamaño del código QR en el PDF
-        doc.addImage(qrImage, 'PNG', 124, 460, 100, 100);
-
-        doc.save(`certificado_${id}.pdf`);
-      } catch (error) {
-        alert("⚠️ Error al generar el PDF. Verifica las URLs de imágenes.");
-        console.error(error);
+      .tab-content {
+        display: none;
+        width: 100%;
+        max-width: 600px;
       }
-    });
-
-    async function procesarCSV() {
-      const input = document.getElementById('csvInput');
-      if (!input.files.length) {
-        alert("📂 Por favor selecciona un archivo CSV.");
-        return;
+      .tab-content.active {
+        display: block;
       }
-      const zip = new JSZip();
-      const certificados = [];
-      Papa.parse(input.files[0], {
-        header: true,
-        skipEmptyLines: true,
-        complete: async function(results) {
-          const today = new Date().toISOString().split('T')[0];
-          for (const row of results.data) {
-            const nombre = row.nombre;
-            const curso = row.curso;
-            const fecha = row.fecha || today;
-            const id = Math.random().toString(36).substring(2, 10);
-            const texto = `${nombre}|${curso}|${fecha}|${id}`;
-            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            const qrUrl = `https://static.wixstatic.com/media/a687f1_054babd862ef4bca96854b866b7ede67~mv2.png`;
-            const pdfBlob = await generarPDFMasivo(nombre, curso, fecha, id, hashHex, qrUrl);
-            zip.file(`certificado_${id}.pdf`, pdfBlob);
-            certificados.push({ nombre, curso, fecha, id, hash: hashHex });
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
-          zip.generateAsync({ type: "blob" }).then(function(content) {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(content);
-            a.download = "certificados.zip";
-            a.click();
-            URL.revokeObjectURL(a.href);
-          });
-          let certificadosExistentes = JSON.parse(localStorage.getItem('certificados') || '[]');
-          certificadosExistentes = certificadosExistentes.concat(certificados);
-          localStorage.setItem('certificados', JSON.stringify(certificadosExistentes));
+      h1,
+      h2 {
+        color: #bb86fc;
+      }
+      form {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 400px;
+        animation: slideUp 1s;
+      }
+      input[type="text"],
+      input[type="date"],
+      input[type="file"] {
+        width: 95%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #bb86fc;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+      }
+      button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #bb86fc;
+        color: #121212;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+      button[type="submit"]:hover {
+        background-color: #9a67ea;
+      }
+      button {
+        background-color: #bb86fc;
+        color: #121212;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #9a67ea;
+      }
+      #certificado {
+        border: 1px solid #bb86fc;
+        padding: 20px;
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 600px;
+        animation: fadeIn 1.5s;
+      }
+      #certificado h2 {
+        color: #bb86fc;
+      }
+      #certificado p {
+        margin: 10px 0;
+      }
+      .oculto {
+        display: none;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-      });
-    }
-
-    async function generarPDFMasivo(nombre, curso, fecha, id, hashHex, qrUrl) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
-      const fondoURL = 'https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg';
-
-      const loadImage = (src) => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "Anonymous";
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = src;
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      /* Ajustar el tamaño del código QR en la vista previa */
+      #qr {
+        width: 200px; /* Ajusta el ancho */
+        height: 200px; /* Ajusta la altura */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Generador de Certificados</h1>
+    <div class="tabs">
+      <div class="tab active" onclick="openTab('individual')">Individual</div>
+      <div class="tab" onclick="openTab('masivo')">Masivo</div>
+    </div>
+    <div id="individual" class="tab-content active">
+      <form id="formulario">
+        <input type="text" id="nombre" placeholder="Nombre completo" required />
+        <input type="text" id="curso" placeholder="Curso" required />
+        <input type="date" id="fecha" required />
+        <button type="submit">Generar Certificado</button>
+      </form>
+      <div id="certificado" class="oculto">
+        <h2>Certificado Generado</h2>
+        <p><strong>Nombre:</strong> <span id="cNombre"></span></p>
+        <p><strong>Curso:</strong> <span id="cCurso"></span></p>
+        <p><strong>Fecha:</strong> <span id="cFecha"></span></p>
+        <p><strong>ID:</strong> <span id="cID"></span></p>
+        <p><strong>Hash :</strong> <span id="cHash"></span></p>
+        <p><img id="qr" src="" alt="QR de verificación" /></p>
+        <p id="nostrStatus">Publicando en Nostr...</p>
+        <button id="descargarTXT">📄 Descargar TXT</button>
+        <button id="descargarPDF">📄 Descargar PDF</button>
+      </div>
+    </div>
+    <div id="masivo" class="tab-content">
+      <h2>Carga masiva desde CSV</h2>
+      <input type="file" id="csvInput" accept=".csv" />
+      <button onclick="procesarCSV()">📥 Generar ZIP de Certificados</button>
+    </div>
+    <script>
+      function openTab(tabName) {
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.remove("active");
         });
+        document.querySelectorAll(".tab-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+        event.currentTarget.classList.add("active");
+        document.getElementById(tabName).classList.add("active");
+      }
+
+      window.onload = function () {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("fecha").value = today;
       };
 
-      try {
-        const fondo = await loadImage(fondoURL);
-        const qrImage = await loadImage(qrUrl);
+      document
+        .getElementById("formulario")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const nombre = document.getElementById("nombre").value;
+          const curso = document.getElementById("curso").value;
+          const fecha = document.getElementById("fecha").value;
+          const id = Math.random().toString(36).substring(2, 10);
+          const texto = `${nombre}|${curso}|${fecha}|${id}`;
+          const hashBuffer = await crypto.subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(texto),
+          );
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+          document.getElementById("cNombre").textContent = nombre;
+          document.getElementById("cCurso").textContent = curso;
+          document.getElementById("cFecha").textContent = fecha;
+          document.getElementById("cID").textContent = id;
+          document.getElementById("cHash").textContent = hashHex;
+          const qrUrl = `https://static.wixstatic.com/media/a687f1_054babd862ef4bca96854b866b7ede67~mv2.png`;
+          document.getElementById("qr").src = qrUrl;
+          document.getElementById("certificado").classList.remove("oculto");
+          const nuevoCertificado = { nombre, curso, fecha, id, hash: hashHex };
+          let certificados = JSON.parse(
+            localStorage.getItem("certificados") || "[]",
+          );
+          certificados.push(nuevoCertificado);
+          localStorage.setItem("certificados", JSON.stringify(certificados));
+        });
 
-        doc.addImage(fondo, 'JPEG', 0, 0, 850, 595);
+      document
+        .getElementById("descargarTXT")
+        .addEventListener("click", function () {
+          const nombre = document.getElementById("cNombre").textContent;
+          const curso = document.getElementById("cCurso").textContent;
+          const fecha = document.getElementById("cFecha").textContent;
+          const id = document.getElementById("cID").textContent;
+          const hash = document.getElementById("cHash").textContent;
+          const contenido = `Nombre: ${nombre}\nCurso: ${curso}\nFecha: ${fecha}\nID: ${id}\nHash: ${hash}`;
+          const blob = new Blob([contenido], {
+            type: "text/plain;charset=utf-8",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `certificado_${id}.txt`;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
 
-        doc.setFontSize(35);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`${curso}`, 425, 130, { align: 'center' });
-        doc.setTextColor(255, 255, 255);
-        doc.text(`${nombre}`, 425, 190, { align: 'center' });
-        doc.setTextColor(0, 0, 0);
-        doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(14);
-        const text = "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
-        doc.text(doc.splitTextToSize(text, 600), 120, 250);
-        const text1 = "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
-        doc.text(doc.splitTextToSize(text1, 650), 100, 310);
-        doc.text("your skills evolve", 340, 345);
-        doc.setFontSize(16);
-        doc.text(`Fecha: ${fecha}`, 40, 500);
-        doc.text(`ID: ${id}`, 40, 520);
-        doc.setFontSize(12);
-        doc.text(`Hash: ${hashHex}`, 40, 540);
+      document
+        .getElementById("descargarPDF")
+        .addEventListener("click", async function () {
+          const nombre = document.getElementById("cNombre").textContent;
+          const curso = document.getElementById("cCurso").textContent;
+          const fecha = document.getElementById("cFecha").textContent;
+          const id = document.getElementById("cID").textContent;
+          const hashHex = document.getElementById("cHash").textContent;
+          const qrUrl = document.getElementById("qr").src;
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({
+            orientation: "landscape",
+            unit: "pt",
+            format: "A4",
+          });
+          const fondoURL =
+            "https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg";
 
-        // Ajustar el tamaño del código QR en el PDF
-        doc.addImage(qrImage, 'PNG', 124, 460, 100, 100);
+          const loadImage = (src) => {
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.crossOrigin = "Anonymous";
+              img.onload = () => resolve(img);
+              img.onerror = reject;
+              img.src = src;
+            });
+          };
 
-        return doc.output("blob");
-      } catch (error) {
-        console.error("Error al generar PDF:", error);
-        alert(`⚠️ Error al generar el PDF para ${nombre}`);
+          try {
+            const fondo = await loadImage(fondoURL);
+            const qrImage = await loadImage(qrUrl);
+
+            doc.addImage(fondo, "JPEG", 0, 0, 850, 595);
+
+            doc.setFontSize(35);
+            doc.text(`${curso}`, 200, 130);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(35);
+            doc.text(`${nombre}`, 230, 190);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(14);
+            const text =
+              "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
+            const maxWidth = 600;
+            const splitText = doc.splitTextToSize(text, maxWidth);
+            doc.text(splitText, 120, 250);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(14);
+            const text1 =
+              "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
+            const maxWidth1 = 650;
+            const splitText1 = doc.splitTextToSize(text1, maxWidth1);
+            doc.text(splitText1, 100, 310);
+            const text2 = "your skills evolve";
+            const splitText2 = doc.splitTextToSize(text2, maxWidth);
+            doc.text(splitText2, 340, 345);
+            doc.setFontSize(16);
+            doc.text(`Fecha: ${fecha}`, 40, 500);
+            doc.text(`ID: ${id}`, 40, 520);
+            doc.setFontSize(12);
+            doc.text(`Hash: ${hashHex}`, 40, 540);
+
+            // Ajustar el tamaño del código QR en el PDF
+            doc.addImage(qrImage, "PNG", 124, 460, 100, 100);
+
+            doc.save(`certificado_${id}.pdf`);
+          } catch (error) {
+            alert("⚠️ Error al generar el PDF. Verifica las URLs de imágenes.");
+            console.error(error);
+          }
+        });
+
+      async function procesarCSV() {
+        const input = document.getElementById("csvInput");
+        if (!input.files.length) {
+          alert("📂 Por favor selecciona un archivo CSV.");
+          return;
+        }
+        const zip = new JSZip();
+        const certificados = [];
+        Papa.parse(input.files[0], {
+          header: true,
+          skipEmptyLines: true,
+          complete: async function (results) {
+            const today = new Date().toISOString().split("T")[0];
+            for (const row of results.data) {
+              const nombre = row.nombre;
+              const curso = row.curso;
+              const fecha = row.fecha || today;
+              const id = Math.random().toString(36).substring(2, 10);
+              const texto = `${nombre}|${curso}|${fecha}|${id}`;
+              const hashBuffer = await crypto.subtle.digest(
+                "SHA-256",
+                new TextEncoder().encode(texto),
+              );
+              const hashArray = Array.from(new Uint8Array(hashBuffer));
+              const hashHex = hashArray
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("");
+              const qrUrl = `https://static.wixstatic.com/media/a687f1_054babd862ef4bca96854b866b7ede67~mv2.png`;
+              const pdfBlob = await generarPDFMasivo(
+                nombre,
+                curso,
+                fecha,
+                id,
+                hashHex,
+                qrUrl,
+              );
+              zip.file(`certificado_${id}.pdf`, pdfBlob);
+              certificados.push({ nombre, curso, fecha, id, hash: hashHex });
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(content);
+              a.download = "certificados.zip";
+              a.click();
+              URL.revokeObjectURL(a.href);
+            });
+            let certificadosExistentes = JSON.parse(
+              localStorage.getItem("certificados") || "[]",
+            );
+            certificadosExistentes =
+              certificadosExistentes.concat(certificados);
+            localStorage.setItem(
+              "certificados",
+              JSON.stringify(certificadosExistentes),
+            );
+          },
+        });
       }
-    }
-  </script>
-</body>
+
+      async function generarPDFMasivo(
+        nombre,
+        curso,
+        fecha,
+        id,
+        hashHex,
+        qrUrl,
+      ) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: "landscape",
+          unit: "pt",
+          format: "A4",
+        });
+        const fondoURL =
+          "https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg";
+
+        const loadImage = (src) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+          });
+        };
+
+        try {
+          const fondo = await loadImage(fondoURL);
+          const qrImage = await loadImage(qrUrl);
+
+          doc.addImage(fondo, "JPEG", 0, 0, 850, 595);
+
+          doc.setFontSize(35);
+          doc.setTextColor(0, 0, 0);
+          doc.text(`${curso}`, 425, 130, { align: "center" });
+          doc.setTextColor(255, 255, 255);
+          doc.text(`${nombre}`, 425, 190, { align: "center" });
+          doc.setTextColor(0, 0, 0);
+          doc.setFont("Helvetica", "normal");
+          doc.setFontSize(14);
+          const text =
+            "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
+          doc.text(doc.splitTextToSize(text, 600), 120, 250);
+          const text1 =
+            "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
+          doc.text(doc.splitTextToSize(text1, 650), 100, 310);
+          doc.text("your skills evolve", 340, 345);
+          doc.setFontSize(16);
+          doc.text(`Fecha: ${fecha}`, 40, 500);
+          doc.text(`ID: ${id}`, 40, 520);
+          doc.setFontSize(12);
+          doc.text(`Hash: ${hashHex}`, 40, 540);
+
+          // Ajustar el tamaño del código QR en el PDF
+          doc.addImage(qrImage, "PNG", 124, 460, 100, 100);
+
+          return doc.output("blob");
+        } catch (error) {
+          console.error("Error al generar PDF:", error);
+          alert(`⚠️ Error al generar el PDF para ${nombre}`);
+        }
+      }
+    </script>
+  </body>
 </html>
