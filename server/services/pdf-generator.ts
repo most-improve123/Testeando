@@ -3,7 +3,6 @@ import QRCode from 'qrcode';
 import { Certificate, Course, User } from '@shared/schema';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as crypto from 'crypto';
 
 export interface CertificateData {
   certificate: Certificate;
@@ -16,6 +15,7 @@ export class PDFGenerator {
     const words = text.split(' ');
     const lines: string[] = [];
     let currentLine = '';
+
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       const textWidth = font.widthOfTextAtSize(testLine, fontSize);
@@ -55,61 +55,55 @@ export class PDFGenerator {
     return Buffer.from(qrCodeDataUrl.split(',')[1], 'base64');
   }
 
-  private async generarHash(texto: string): Promise<string> {
-    const buffer = new TextEncoder().encode(texto);
-    const digest = await crypto.subtle.digest("SHA-256", buffer);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
   async generateCertificate(data: CertificateData): Promise<Buffer> {
     const { certificate, user, course } = data;
 
-    // Crear un nuevo documento PDF
+    // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
 
-    // Añadir una página con dimensiones de certificado (A4 horizontal)
+    // Add a page with certificate dimensions (A4 landscape)
     const page = pdfDoc.addPage([842, 595]);
     const { width, height } = page.getSize();
 
-    // Incrustar fuentes
+    // Embed fonts
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    // Cargar imagen de fondo si está disponible
+    // Load background image if available
     if (course.certificateBackground) {
       try {
-        // Por ahora, usaremos un fondo predeterminado ya que no podemos cargar desde URL en este entorno
-        // En producción, obtendrías la imagen desde la URL
+        // For now, we'll use a default background since we can't load from URL in this environment
+        // In production, you'd fetch the image from the URL
         page.drawRectangle({
           x: 0,
           y: 0,
           width: width,
           height: height,
-          color: rgb(0.992, 0.816, 0.027), // #FCD307 amarillo
+          color: rgb(0.992, 0.816, 0.027), // #FCD307 yellow
         });
       } catch (error) {
-        console.error('Error al cargar la imagen de fondo:', error);
-        // Volver a un fondo amarillo predeterminado
+        console.error('Failed to load background image:', error);
+        // Fallback to yellow background
         page.drawRectangle({
           x: 0,
           y: 0,
           width: width,
           height: height,
-          color: rgb(0.992, 0.816, 0.027), // #FCD307 amarillo
+          color: rgb(0.992, 0.816, 0.027), // #FCD307 yellow
         });
       }
     } else {
-      // Fondo amarillo predeterminado
+      // Default yellow background
       page.drawRectangle({
         x: 0,
         y: 0,
         width: width,
         height: height,
-        color: rgb(0.992, 0.816, 0.027), // #FCD307 amarillo
+        color: rgb(0.992, 0.816, 0.027), // #FCD307 yellow
       });
     }
 
-    // Nombre del curso (centrado, 1-2 líneas)
+    // Course name (centered, 1-2 lines)
     const courseLines = this.splitTextIntoLines(course.title, 600, boldFont, 28);
     const courseStartY = height - 180;
 
@@ -124,7 +118,7 @@ export class PDFGenerator {
       });
     });
 
-    // Nombre del usuario (centrado, 1-2 líneas)
+    // User name (centered, 1-2 lines)
     const userLines = this.splitTextIntoLines(user.name, 600, boldFont, 32);
     const userStartY = height - 280;
 
@@ -139,7 +133,7 @@ export class PDFGenerator {
       });
     });
 
-    // Texto estático del certificado
+    // Static certificate text
     const certificateText = "WeSpark certifies that you have completed our future-ready learning experience designed to build practical skills for real-world impact. This certificate celebrates your participation in our interactive, innovation-focused training. Now go out there and release your inner genius!";
     const textLines = this.splitTextIntoLines(certificateText, 700, font, 14);
     let textStartY = height - 380;
@@ -155,9 +149,9 @@ export class PDFGenerator {
       });
     });
 
-    // Ciudad y fecha
+    // City and date
     const completionDate = new Date(certificate.completionDate);
-    const dateString = completionDate.toLocaleDateString('de-DE'); // Formato DD.MM.AAAA
+    const dateString = completionDate.toLocaleDateString('de-DE'); // DD.MM.YYYY format
     const cityDateText = certificate.city ? `${certificate.city}, ${dateString}` : dateString;
 
     const cityDateWidth = font.widthOfTextAtSize(cityDateText, 16);
@@ -169,7 +163,7 @@ export class PDFGenerator {
       color: rgb(0, 0, 0),
     });
 
-    // Firmas
+    // Signatures
     page.drawText('Nelson Inno', {
       x: width / 2 - 150,
       y: height - 520,
@@ -218,7 +212,7 @@ export class PDFGenerator {
       color: rgb(0, 0, 0),
     });
 
-    // Generar y añadir código QR (abajo a la izquierda)
+    // Generate and add QR code (bottom left)
     try {
       const qrCodeBuffer = await this.generateQRCode(certificate.certificateId);
       const qrCodeImage = await pdfDoc.embedPng(qrCodeBuffer);
@@ -230,10 +224,10 @@ export class PDFGenerator {
         height: 100,
       });
     } catch (error) {
-      console.error('Error al generar el código QR:', error);
+      console.error('Failed to generate QR code:', error);
     }
 
-    // Cargar y añadir el logo de WeSpark (centro)
+    // Load and add WeSpark logo (center)
     try {
       const logoPath = path.join(process.cwd(), 'attached_assets', 'Logo Only with White Border_1752094039667.png');
       if (fs.existsSync(logoPath)) {
@@ -248,14 +242,12 @@ export class PDFGenerator {
         });
       }
     } catch (error) {
-      console.error('Error al cargar el logo:', error);
+      console.error('Failed to load logo:', error);
     }
 
-    // Serializar el PDF
+    // Serialize the PDF
     const pdfBytes = await pdfDoc.save();
-    const pdfBuffer = Buffer.from(pdfBytes);
-
-    return pdfBuffer;
+    return Buffer.from(pdfBytes);
   }
 }
 
