@@ -103,6 +103,8 @@ WeSpark is a certificate management platform built with a modern full-stack arch
 - **Connection**: Serverless PostgreSQL via Neon
 
 ## Changelog
+- July 29, 2025. Fixed Firebase import error by removing unused Firebase integration code from PDF generator
+- July 09, 2025. Resolved database migration issues and API routing problems, confirmed all core functionality working
 - July 08, 2025. Added course thumbnail support with admin editing capabilities
 - July 07, 2025. Initial setup
 
