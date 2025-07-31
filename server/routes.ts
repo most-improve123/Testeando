@@ -317,8 +317,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.updateCertificate(certificate.id, { hash: certHash });
         }
 
-        // Generate unique Firebase ID
-        const firebaseId = `FB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // Generate unique Firebase ID only if it doesn't exist
+        let firebaseId = certificate.firebaseId;
+        if (!firebaseId) {
+          firebaseId = `FB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          // Update the certificate with Firebase ID
+          await storage.updateCertificate(certificate.id, { firebaseId: firebaseId });
+        }
 
         const firebaseCertificate = {
           id: firebaseId,
@@ -330,9 +335,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: certificate.userId,
           courseId: certificate.courseId,
         };
-
-        // Update the certificate with Firebase ID
-        await storage.updateCertificate(certificate.id, { firebaseId: firebaseId });
 
         const { saveCertificateToFirebase } = await import('./services/firebase-service.js');
         await saveCertificateToFirebase(firebaseCertificate);
