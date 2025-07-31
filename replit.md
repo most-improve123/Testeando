@@ -103,7 +103,7 @@ WeSpark is a certificate management platform built with a modern full-stack arch
 - **Connection**: Serverless PostgreSQL via Neon
 
 ## Changelog
-- July 31, 2025. Successfully migrated project to Replit environment and integrated Firebase functionality. Added automatic certificate storage to Firebase on PDF download with unique IDs and SHA-256 hashes for verification. System now works exactly like the HTML examples provided by user.
+- July 31, 2025. Successfully migrated project to Replit environment and integrated Firebase functionality. Added automatic certificate storage to Firebase on PDF download with unique IDs and SHA-256 hashes for verification. Certificate PDFs now display both hash and Firebase ID for verification. Verification system works with certificate ID, hash, or Firebase ID. System now works exactly like the HTML examples provided by user.
 - July 29, 2025. Fixed Firebase import error by removing unused Firebase integration code from PDF generator
 - July 09, 2025. Resolved database migration issues and API routing problems, confirmed all core functionality working
 - July 08, 2025. Added course thumbnail support with admin editing capabilities
