@@ -1,0 +1,260 @@
+[33mcommit 3f84c4d9ea8b6228ae2c5b0b6496c70fb08b9b72[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: leviasaelpalaciosmendez <leviasaelpalaciosmendez@gmail.com>
+Date:   Thu Jul 31 11:12:53 2025 -0500
+
+    N31
+
+[33mcommit ac05d794db9d17027eb0737877f0d6daf60fbe06[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:28:02 2025 +0000
+
+    Ensure the platform can correctly generate and display QR codes for certificates
+    
+    Add @types/qrcode to dependencies to resolve type errors and ensure proper QR code generation.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 906d5b11-51f0-45c6-8924-b293a4b44284
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/906d5b11-51f0-45c6-8924-b293a4b44284/O08ckQd
+
+[33mcommit f24d3fdf0eceafcc5e9e9224cff5939fcd7312df[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:23:30 2025 +0000
+
+    Restored to 'b5cec100737c783c0a457d28eb0e71496e5e1272'
+    
+    Replit-Restored-To: b5cec100737c783c0a457d28eb0e71496e5e1272
+
+[33mcommit 74a57f9eb635d296417599b8936f8c3eacb0abcb[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:23:25 2025 +0000
+
+    Saved your changes before starting work
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 863bf848-fc2d-48ba-8562-43ba2d36ce7c
+
+[33mcommit 6d857a0a207d696e581a44f8b735164e8d3ba472[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:21:56 2025 +0000
+
+    Restored to 'b5cec100737c783c0a457d28eb0e71496e5e1272'
+    
+    Replit-Restored-To: b5cec100737c783c0a457d28eb0e71496e5e1272
+
+[33mcommit b2ee61c4e7819fb64fe34c81ac60ef61f1523b94[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:21:52 2025 +0000
+
+    Saved your changes before starting work
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: f1a56554-26d4-4c16-ba17-dd9d2d485963
+
+[33mcommit 69cfc839fb832f1e10034241a76e4b691e554a7b[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:19:01 2025 +0000
+
+    Restored to '79868c285be3b2bc1a290a9eb80986235f72fe35'
+    
+    Replit-Restored-To: 79868c285be3b2bc1a290a9eb80986235f72fe35
+
+[33mcommit 1b3adab57d7e2c436d6a4e9c6b014c5f6c8e342c[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 18:18:54 2025 +0000
+
+    Saved your changes before starting work
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 5eb0abdd-8504-44fe-91be-6a9bb1954319
+
+[33mcommit 79868c285be3b2bc1a290a9eb80986235f72fe35[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 17:32:48 2025 +0000
+
+    Improve certificate generation and QR code handling for reliability
+    
+    Refactors QR code generation in PDFGenerator and updates hash generation using crypto.createHash.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/db468b65-23a1-4832-84f8-64493820e550.jpg
+
+[33mcommit b5cec100737c783c0a457d28eb0e71496e5e1272[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 29 17:20:05 2025 +0000
+
+    Remove Firebase integration from PDF generator due to import error
+    
+    Removes unused Firebase code from pdf-generator.ts and updates replit.md changelog.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/db468b65-23a1-4832-84f8-64493820e550.jpg
+
+[33mcommit 133b4f3fd56d2932ac5c7fc810fccdf75f1fe08d[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Mon Jul 28 19:47:44 2025 +0000
+
+    Improve the application's user interface and overall project structure
+    
+    Refactors cert.html to use lowercase doctype and adjusts .replit to rename run button.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/db468b65-23a1-4832-84f8-64493820e550.jpg
+
+Notes:
+    Improve the application's user interface and overall project structure
+
+[33mcommit 4fcabedb2b47a1e3c14d1c4ed71467362810e0c5[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Mon Jul 28 19:37:56 2025 +0000
+
+    Enable users to generate custom certificates with a new user interface
+    
+    Adds a new HTML page (cert.html) for generating certificates using JavaScript libraries.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/db468b65-23a1-4832-84f8-64493820e550.jpg
+
+Notes:
+    Enable users to generate custom certificates with a new user interface
+
+[33mcommit 5430a0d2b86dcb91a9c0c3f9ccb327744502b670[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Wed Jul 9 21:26:14 2025 +0000
+
+    Enhance course options and improve error handling for certificate platform
+    
+    Adds thumbnail and background image options to courses and adds error logging.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/db468b65-23a1-4832-84f8-64493820e550.jpg
+
+[33mcommit abbaefbf08478f39fd7c7e6476d93e6b98e1d799[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Wed Jul 9 20:58:05 2025 +0000
+
+    Enhance certificate appearance with backgrounds and improves user data import
+    
+    Adds certificate background images, city to user import, and PDF generation.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/56540367-c4e4-45ed-ae25-91092ca8dd3f.jpg
+
+[33mcommit a66de76063bd1f4d46c387b219771d02abff6bb1[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 23:48:38 2025 +0000
+
+    Improve course creation and editing interface with better controls
+    
+    Fixes cancel button in course dialog, adds dialog open state, and clarifies the Icon Class field.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/00e37ab8-8669-4842-9d76-86864550f203.jpg
+
+[33mcommit 71d73215e5fbb15d428e1654e4d188e556dadee9[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 23:39:41 2025 +0000
+
+    Add image previews to course listings and enable admin thumbnail editing
+    
+    Implements course thumbnail image support by adding a "thumbnail" field to the courses schema and updating the admin page and certificate card components.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/1da553c2-71e2-4479-afc0-97c57c96f3d7.jpg
+
+[33mcommit 4978a9cdfb9b4c4f07a7b4a34f188e02ea211e53[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 23:27:22 2025 +0000
+
+    Enable administrators to create, update, and manage courses directly
+    
+    Implements course creation and editing functionality in the Admin page using `useMutation` and form state management.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/25a57a86-d0ca-4550-98ad-93c56cf7e7a4.jpg
+
+[33mcommit a528c5ed5b1ea195e152cfdfc7d85af02e2779e1[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 23:22:30 2025 +0000
+
+    Visually distinguish users and admins on the admin dashboard more clearly
+    
+    Implement dynamic background and text colors for user avatars based on role in admin.tsx.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/f2b2f2c6-3d12-430f-a6af-282faf5feb05.jpg
+
+[33mcommit 0be2b385b52d09140f7d84239d133a347758d121[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 23:03:14 2025 +0000
+
+    Increase the size of the LinkedIn logo to improve visual clarity
+    
+    Update LinkedIn share button icon size from h-4 w-4 to h-6 w-6 in CertificateCard component.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/b85b1897-e97f-4b9c-a0c6-231ff07c1cb0.jpg
+
+[33mcommit 67da388db4fc7a3bf68ccfff72c35960ba322f4d[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 22:55:51 2025 +0000
+
+    Update LinkedIn sharing button with new image to improve visual appeal
+    
+    Replaces Lucide's LinkedIn icon with a custom image asset (image_1752015253525.png) in CertificateCard component.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/df8b7088-ece6-4a9e-958f-49148d677a49.jpg
+
+[33mcommit 33c5bbde42d4946aa3f717d467fe7ef97bf38f9e[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 22:53:18 2025 +0000
+
+    Improve the readability of buttons by ensuring adequate text contrast
+    
+    Add CSS rules to force black text on primary buttons and elements with `bg-primary` class.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/a202350f-26a3-4761-a646-cb0e0f7e14c2.jpg
+
+[33mcommit 0dbeca8f09f8de295840a123e1217b1fa9a9a7b7[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Tue Jul 8 22:49:37 2025 +0000
+
+    Update button colors and ensure correct company is selected on LinkedIn
+    
+    Modify primary color to yellow and black, and append organizationId to LinkedIn share links.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/febd5453-8200-4faf-8aa4-14f1678eab6c.jpg
+
+[33mcommit e636d00af6e88df40f15f23f7f1f2b78a4df2cbf[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Mon Jul 7 22:32:58 2025 +0000
+
+    Build basic structure and components for the certificate platform
+    
+    Initializes project structure, core UI components, and basic routing for the WeSpark certificate management platform.
+    
+    Replit-Commit-Author: Agent
+    Replit-Commit-Session-Id: 2eaf3550-d0b9-4075-b56e-fbc5a7a38d69
+    Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/4bb6f76c-6357-41c2-9d60-ef934ecd6afe/46645eb0-9ee0-4cb9-a456-798b49023694.jpg
+
+[33mcommit c71c03391f12b45de192dbcfaabd7a53d1dcc172[m
+Author: nelsoninno <36312622-nelsoninno@users.noreply.replit.com>
+Date:   Mon Jul 7 21:57:34 2025 +0000
+
+    Initial commit
