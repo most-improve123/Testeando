@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import csv from 'csv-parser';
+import crypto from 'crypto';
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -255,10 +256,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/certificates", async (req, res) => {
     try {
+      const certificateId = authService.generateCertificateId();
+      const hashData = `${req.body.name || ''}|${req.body.course || ''}|${req.body.completionDate}|${certificateId}`;
+      const hash = crypto.createHash('sha256').update(hashData).digest('hex');
+      
       const certificateData = {
         ...req.body,
-        certificateId: authService.generateCertificateId(),
+        certificateId,
         completionDate: new Date(req.body.completionDate),
+        hash,
       };
       const validatedData = insertCertificateSchema.parse(certificateData);
       const certificate = await storage.createCertificate(validatedData);
@@ -286,6 +292,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Certificate data incomplete" });
       }
 
+      // Save to Firebase when PDF is downloaded
+      try {
+        const firebaseCertificate = {
+          id: certificate.certificateId,
+          certificateId: certificate.certificateId,
+          nombre: user.name,
+          curso: course.title,
+          fecha: certificate.completionDate.toISOString().split('T')[0],
+          hash: certificate.hash,
+          userId: certificate.userId,
+          courseId: certificate.courseId,
+        };
+
+        // Import Firebase functions dynamically to avoid issues
+        const { saveCertificateToFirebase } = await import('../client/src/lib/firebase.js');
+        await saveCertificateToFirebase(firebaseCertificate);
+        console.log(`Certificate ${certificate.certificateId} saved to Firebase on download`);
+      } catch (firebaseError) {
+        console.error('Failed to save to Firebase:', firebaseError);
+        // Continue with PDF generation even if Firebase fails
+      }
+
       const pdfBuffer = await pdfGenerator.generateCertificate({
         certificate,
         user,
@@ -296,6 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificate.certificateId}.pdf"`);
       res.send(pdfBuffer);
     } catch (error) {
+      console.error('Download error:', error);
       res.status(500).json({ error: "Failed to generate certificate" });
     }
   });
@@ -349,13 +378,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   continue;
                 }
 
-                // Create certificate
+                // Create certificate with hash
+                const certificateId = authService.generateCertificateId();
+                const hashData = `${name}|${course}|${completion_date}|${certificateId}`;
+                const hash = crypto.createHash('sha256').update(hashData).digest('hex');
+                
                 const certificate = await storage.createCertificate({
-                  certificateId: authService.generateCertificateId(),
+                  certificateId,
                   userId: user.id,
                   courseId: foundCourse.id,
                   completionDate: new Date(completion_date),
                   city: city || null,
+                  hash,
                 });
                 imported.certificates++;
 

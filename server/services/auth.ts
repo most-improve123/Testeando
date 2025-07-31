@@ -2,6 +2,11 @@ import crypto from 'crypto';
 import { storage } from '../storage';
 import { User } from '@shared/schema';
 
+// Generate SHA-256 hash for verification
+export function generateCertificateHash(data: string): string {
+  return crypto.createHash('sha256').update(data).digest('hex');
+}
+
 export interface AuthService {
   createMagicLink(email: string): Promise<string>;
   verifyMagicLink(token: string): Promise<User | null>;
