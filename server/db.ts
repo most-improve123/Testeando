@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { users, courses, certificates, magicLinks } from '@shared/schema';
+import crypto from 'crypto';
 
 // Create the postgres client
 const connectionString = process.env.DATABASE_URL;
@@ -64,18 +65,23 @@ export async function initializeDatabase() {
     }).returning();
 
     // Create sample certificates for the graduate
+    const cert1Data = `${graduateUser.name}|${sampleCourses[0].title}|2024-12-15|WS-2025-ABC123`;
+    const cert2Data = `${graduateUser.name}|${sampleCourses[1].title}|2024-11-20|WS-2025-DEF456`;
+    
     const sampleCertificates = await db.insert(certificates).values([
       {
         certificateId: "WS-2025-ABC123",
         userId: graduateUser.id,
         courseId: sampleCourses[0].id,
         completionDate: new Date('2024-12-15'),
+        hash: crypto.createHash('sha256').update(cert1Data).digest('hex'),
       },
       {
         certificateId: "WS-2025-DEF456",
         userId: graduateUser.id,
         courseId: sampleCourses[1].id,
         completionDate: new Date('2024-11-20'),
+        hash: crypto.createHash('sha256').update(cert2Data).digest('hex'),
       },
     ]).returning();
 
