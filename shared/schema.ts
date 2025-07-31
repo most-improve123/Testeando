@@ -24,13 +24,15 @@ export const courses = pgTable("courses", {
 
 export const certificates = pgTable("certificates", {
   id: serial("id").primaryKey(),
-  certificateId: varchar("certificate_id", { length: 20 }).notNull().unique(),
+  certificateId: varchar("certificate_id", { length: 50 }).notNull().unique(),
   userId: integer("user_id").references(() => users.id).notNull(),
   courseId: integer("course_id").references(() => courses.id).notNull(),
   issuedAt: timestamp("issued_at").defaultNow(),
   completionDate: timestamp("completion_date").notNull(),
   pdfPath: text("pdf_path"),
   city: text("city"),
+  hash: text("hash").notNull().unique(), // SHA-256 hash for verification
+  firebaseId: text("firebase_id"), // Reference to Firebase document
 });
 
 export const magicLinks = pgTable("magic_links", {

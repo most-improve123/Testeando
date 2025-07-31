@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generar Certificados</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhkYGB03wGa83j10tEYgOvzUiUo_X2o40",
+      authDomain: "http:produccion-c4196.firebaseapp.com",
+      projectId: "produccion-c4196",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function openTab(tabName, event) {
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function(event) {
+          openTab(this.getAttribute('data-tab'), event);
+        });
+      });
+    });
+
+    function generateQRCodeLink(id) {
+      return `https://static.wixstatic.com/media/a687f1_2aec1f4419154664966e3f83b91c4bec~mv2.png`;
+    }
+
+    async function generarHash(texto) {
+      const buffer = new TextEncoder().encode(texto);
+      const digest = await crypto.subtle.digest("SHA-256", buffer);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function generarPDFIndividual(nombre, curso, fecha, id, hashHex) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
+      const fondoURL = 'https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg';
+      const qrUrl = generateQRCodeLink(id);
+
+      const loadImage = (src) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      };
+
+      try {
+        const fondo = await loadImage(fondoURL);
+        const qrImage = await loadImage(qrUrl);
+        doc.addImage(fondo, 'JPEG', 0, 0, 850, 595);
+        doc.setFontSize(35);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`${curso}`, 425, 130, { align: 'center' });
+        doc.setTextColor(255, 255, 255);
+        doc.text(`${nombre}`, 425, 190, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(14);
+        const text = "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
+        doc.text(doc.splitTextToSize(text, 600), 120, 250);
+        const text1 = "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
+        doc.text(doc.splitTextToSize(text1, 650), 100, 310);
+        doc.text("your skills evolve", 340, 345);
+        doc.setFontSize(10);
+        doc.text(`Fecha: ${fecha}`, 128, 585);
+        doc.text(`ID: ${id}`, 4, 15);
+        doc.setFontSize(10);
+        doc.text(`Hash: ${hashHex}`, 263, 585);
+        doc.addImage(qrImage, 'PNG', 124, 460, 100, 100);
+        doc.save(`certificado_${id}.pdf`);
+      } catch (error) {
+        console.error("Error al generar PDF:", error);
+        alert(`⚠️ Error al generar el PDF para ${nombre}`);
+      }
+    }
+
+    document.getElementById("formSubir").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value.trim();
+      const curso = document.getElementById("curso").value.trim();
+      const fecha = document.getElementById("fecha").value;
+
+      if (!nombre || !curso || !fecha) return alert("Todos los campos son requeridos.");
+
+      const id = crypto.randomUUID();
+      const texto = `${nombre}|${curso}|${fecha}|${id}`;
+      const hash = await generarHash(texto);
+      const data = { id, nombre, curso, fecha, hash };
+
+      try {
+        await addDoc(collection(db, "certificados"), data);
+        alert("✅ Certificado subido con éxito\nID: " + id + "\nHash: " + hash);
+        await generarPDFIndividual(nombre, curso, fecha, id, hash);
+        document.getElementById("formSubir").reset();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al subir certificado");
+      }
+    });
+
+    async function procesarCSV() {
+      const input = document.getElementById('csvInput');
+      if (!input.files.length) {
+        alert("📂 Por favor selecciona un archivo CSV.");
+        return;
+      }
+
+      const zip = new JSZip();
+      const certificados = [];
+
+      Papa.parse(input.files[0], {
+        header: true,
+        skipEmptyLines: true,
+        complete: async function(results) {
+          const today = new Date().toISOString().split('T')[0];
+          for (const row of results.data) {
+            const nombre = row.nombre;
+            const curso = row.curso;
+            const fecha = row.fecha || today;
+            const id = Math.random().toString(36).substring(2, 10);
+            const texto = `${nombre}|${curso}|${fecha}|${id}`;
+            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const qrUrl = generateQRCodeLink(id);
+            const pdfBlob = await generarPDFMasivo(nombre, curso, fecha, id, hashHex, qrUrl);
+            zip.file(`certificado_${id}.pdf`, pdfBlob);
+            const nuevoCertificado = { id, nombre, curso, fecha, hash: hashHex };
+            certificados.push(nuevoCertificado);
+
+            try {
+              await addDoc(collection(db, "certificados"), nuevoCertificado);
+              console.log("✅ Certificado subido con éxito\nID: " + id + "\nHash: " + hashHex);
+            } catch (err) {
+              console.error("Error al subir certificado:", err);
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+
+          zip.generateAsync({ type: "blob" }).then(function(content) {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(content);
+            a.download = "certificados.zip";
+            a.click();
+            URL.revokeObjectURL(a.href);
+          });
+
+          let certificadosExistentes = JSON.parse(localStorage.getItem('certificados') || '[]');
+          certificadosExistentes = certificadosExistentes.concat(certificados);
+          localStorage.setItem('certificados', JSON.stringify(certificadosExistentes));
+        }
+      });
+    }
+
+    async function generarPDFMasivo(nombre, curso, fecha, id, hashHex, qrUrl) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
+      const fondoURL = 'https://static.wixstatic.com/media/a687f1_6daa751a4aac4a418038ae37f20db004~mv2.jpg';
+
+      const loadImage = (src) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      };
+
+      try {
+        const fondo = await loadImage(fondoURL);
+        const qrImage = await loadImage(qrUrl);
+        doc.addImage(fondo, 'JPEG', 0, 0, 850, 595);
+        doc.setFontSize(35);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`${curso}`, 425, 130, { align: 'center' });
+        doc.setTextColor(255, 255, 255);
+        doc.text(`${nombre}`, 425, 190, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(14);
+        const text = "weSpark hereby certifies that you have successfully completed our Design Sprint Masterclass, demonstrating your ability to lead teams to create and test new product concepts in only 4 days.";
+        doc.text(doc.splitTextToSize(text, 600), 120, 250);
+        const text1 = "This achievement signifies your initial step toward mastering the art of Sprinting. Continue to enhance your expertise by consistently applying the Sprint methodology to tackle real-world challenges and watch";
+        doc.text(doc.splitTextToSize(text1, 650), 100, 310);
+        doc.text("your skills evolve", 340, 345);
+        doc.setFontSize(10);
+        doc.text(`Fecha: ${fecha}`, 128, 585);
+        doc.text(`ID: ${id}`, 4, 15);
+        doc.setFontSize(10);
+        doc.text(`Hash: ${hashHex}`, 263, 585);
+        doc.addImage(qrImage, 'PNG', 124, 460, 100, 100);
+        return doc.output("blob");
+      } catch (error) {
+        console.error("Error al generar PDF:", error);
+        alert(`⚠️ Error al generar el PDF para ${nombre}`);
+      }
+    }
+
+    window.procesarCSV = procesarCSV;
+  </script>
+ <style>
+    body {
+      background: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tabs {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      background-color: #E2E2E2;
+      border: 1px solid #eceae4;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background-color: #FFBC00;
+      color: #000000;
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    form {
+      background: #E2E2E2;
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    input, button {
+      width: 95%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    input {
+      border: 1px solid #ccc9c3;
+      background: #FFFFFF;
+      color: #000000;
+    }
+
+    button {
+      background: #FFBC00;
+      color: #000000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #FCD307;
+    }
+  </style>
+</head>
+<body>
+  <h1>Generar Certificado</h1>
+  <div class="tabs">
+    <div class="tab active" data-tab="individual">Individual</div>
+    <div class="tab" data-tab="masivo">Masivo</div>
+  </div>
+  <div id="individual" class="tab-content active">
+    <div class="form-container">
+    <form id="formSubir">
+      <input type="text" id="nombre" placeholder="Nombre completo" required />
+      <input type="text" id="curso" placeholder="Curso" required />
+      <input type="date" id="fecha" required />
+      <button type="submit">Generar</button>
+    </form>
+  </div>
+  </div>
+  <div id="masivo" class="tab-content">
+    <h2>Carga masiva desde CSV</h2>
+    <input type="file" id="csvInput" accept=".csv" />
+    <button onclick="procesarCSV()">Generar ZIP de Certificados</button>
+  </div>
+</body>
+</html>
