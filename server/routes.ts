@@ -241,13 +241,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/verify/:certificateId", async (req, res) => {
+  app.get("/api/verify/:idOrHash", async (req, res) => {
     try {
-      const certificateId = req.params.certificateId;
-      const certificate = await storage.getCertificateByCertificateId(certificateId);
+      const { idOrHash } = req.params;
+      
+      // First try to find by certificate ID
+      let certificate = await storage.getCertificateByCertificateId(idOrHash);
+      
+      // If not found by certificate ID, search by hash or firebase ID
+      if (!certificate) {
+        const allCertificates = await storage.getAllCertificates();
+        certificate = allCertificates.find(cert => 
+          cert.hash === idOrHash || 
+          cert.firebaseId === idOrHash
+        );
+      }
+      
       if (!certificate) {
         return res.status(404).json({ error: "Certificate not found" });
       }
+      
       res.json(certificate);
     } catch (error) {
       res.status(500).json({ error: "Failed to verify certificate" });

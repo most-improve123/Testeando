@@ -62,7 +62,7 @@ export default function Verifier() {
         </div>
         <h1 className="text-3xl font-bold text-neutral-800 mb-2">Certificate Verification</h1>
         <p className="text-neutral-600 max-w-2xl mx-auto">
-          Enter a certificate number to verify its authenticity and view details
+          Enter a certificate ID, hash, or Firebase ID to verify its authenticity and view details
         </p>
       </div>
 
@@ -71,13 +71,13 @@ export default function Verifier() {
         <CardContent className="p-8">
           <div className="max-w-md mx-auto">
             <Label htmlFor="certificateId" className="text-sm font-medium text-neutral-700 mb-3">
-              Certificate Number
+              Certificate ID, Hash, or Firebase ID
             </Label>
             <div className="flex space-x-3">
               <Input
                 id="certificateId"
                 type="text"
-                placeholder="Enter certificate number (e.g., WS-2025-001)"
+                placeholder="Enter certificate ID, hash, or Firebase ID"
                 value={certificateId}
                 onChange={(e) => setCertificateId(e.target.value)}
                 className="flex-1 border-neutral-200 text-center font-mono"
@@ -92,7 +92,7 @@ export default function Verifier() {
               </Button>
             </div>
             <p className="text-xs text-neutral-500 mt-2 text-center">
-              Certificate numbers are case-sensitive
+              You can verify using certificate ID, SHA-256 hash, or Firebase ID
             </p>
           </div>
         </CardContent>
