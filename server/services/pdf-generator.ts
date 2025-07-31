@@ -244,6 +244,41 @@ export class PDFGenerator {
         width: 100,
         height: 100,
       });
+
+      // Add certificate ID below QR code
+      page.drawText(`ID: ${certificate.certificateId}`, {
+        x: 50,
+        y: 30,
+        size: 10,
+        font: font,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+
+      // Add hash below certificate ID
+      if (certificate.hash) {
+        const hashText = certificate.hash.length > 20 
+          ? `Hash: ${certificate.hash.substring(0, 20)}...`
+          : `Hash: ${certificate.hash}`;
+        
+        page.drawText(hashText, {
+          x: 50,
+          y: 15,
+          size: 10,
+          font: font,
+          color: rgb(0.3, 0.3, 0.3),
+        });
+      }
+
+      // Add Firebase ID if available
+      if (certificate.firebaseId) {
+        page.drawText(`Firebase ID: ${certificate.firebaseId}`, {
+          x: 200,
+          y: 30,
+          size: 10,
+          font: font,
+          color: rgb(0.3, 0.3, 0.3),
+        });
+      }
     } catch (error) {
       console.error("Error al generar el código QR:", error);
     }

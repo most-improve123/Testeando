@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -10,38 +10,17 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+const db = getFirestore(app);
 
-// Types for Firebase documents
 export interface FirebaseCertificate {
   id: string;
+  certificateId: string;
   nombre: string;
   curso: string;
   fecha: string;
   hash: string;
-  certificateId: string;
   userId?: number;
   courseId?: number;
-}
-
-// Generate SHA-256 hash
-export async function generateHash(text: string): Promise<string> {
-  const buffer = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", buffer);
-  return Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-// Save certificate to Firebase
-export async function saveCertificateToFirebase(certificate: FirebaseCertificate): Promise<void> {
-  try {
-    await addDoc(collection(db, "certificados"), certificate);
-    console.log("Certificate saved to Firebase with ID:", certificate.id);
-  } catch (error) {
-    console.error("Error saving certificate to Firebase:", error);
-    throw error;
-  }
 }
 
 // Verify certificate by ID or hash

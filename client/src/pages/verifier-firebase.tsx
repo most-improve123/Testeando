@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Search } from 'lucide-react';
-import { verifyCertificateFromFirebase, type FirebaseCertificate } from '@/lib/firebase';
+import { type FirebaseCertificate } from '@/lib/firebase';
 
 export default function VerifierFirebase() {
   const [certificateId, setCertificateId] = useState('');
@@ -21,9 +21,11 @@ export default function VerifierFirebase() {
     setCertificate(null);
 
     try {
-      const result = await verifyCertificateFromFirebase(certificateId.trim());
-      if (result) {
-        setCertificate(result);
+      const response = await fetch(`/api/verify-firebase/${certificateId.trim()}`);
+      const data = await response.json();
+      
+      if (response.ok && data.valid) {
+        setCertificate(data.certificate);
       } else {
         setError('Certificado no encontrado o inválido');
       }
@@ -106,7 +108,10 @@ export default function VerifierFirebase() {
                           <strong>Fecha:</strong> {certificate.fecha}
                         </div>
                         <div>
-                          <strong>ID:</strong> {certificate.certificateId}
+                          <strong>ID Certificado:</strong> {certificate.certificateId}
+                        </div>
+                        <div>
+                          <strong>ID Firebase:</strong> {certificate.id}
                         </div>
                       </div>
                       <div className="mt-3 p-2 bg-green-800 rounded text-xs">

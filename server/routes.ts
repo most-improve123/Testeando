@@ -301,11 +301,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           certHash = crypto.createHash('sha256').update(hashData).digest('hex');
           
           // Update the database with the real hash
-          await storage.updateCertificateHash(certificate.id, certHash);
+          await storage.updateCertificate(certificate.id, { hash: certHash });
         }
 
+        // Generate unique Firebase ID
+        const firebaseId = `FB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
         const firebaseCertificate = {
-          id: certificate.certificateId,
+          id: firebaseId,
           certificateId: certificate.certificateId,
           nombre: user.name,
           curso: course.title,
@@ -314,6 +317,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: certificate.userId,
           courseId: certificate.courseId,
         };
+
+        // Update the certificate with Firebase ID
+        await storage.updateCertificate(certificate.id, { firebaseId: firebaseId });
 
         const { saveCertificateToFirebase } = await import('./services/firebase-service.js');
         await saveCertificateToFirebase(firebaseCertificate);
@@ -422,6 +428,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
     } catch (error) {
       res.status(500).json({ error: "Failed to import CSV" });
+    }
+  });
+
+  // Firebase verification route
+  app.get('/api/verify-firebase/:idOrHash', async (req, res) => {
+    try {
+      const { idOrHash } = req.params;
+      
+      // Try Firebase verification first
+      try {
+        const { verifyCertificateFromFirebase } = await import('./services/firebase-service.js');
+        const firebaseCertificate = await verifyCertificateFromFirebase(idOrHash);
+        
+        if (firebaseCertificate) {
+          return res.json({
+            valid: true,
+            source: 'firebase',
+            certificate: firebaseCertificate
+          });
+        }
+      } catch (firebaseError) {
+        console.error('Firebase verification failed:', firebaseError);
+      }
+
+      // Fallback to database verification by hash or firebaseId
+      const allCertificates = await storage.getAllCertificates();
+      const certificate = allCertificates.find(cert => 
+        cert.hash === idOrHash || 
+        cert.firebaseId === idOrHash ||
+        cert.certificateId === idOrHash
+      );
+      
+      if (certificate) {
+        return res.json({
+          valid: true,
+          source: 'database',
+          certificate: {
+            id: certificate.firebaseId || certificate.certificateId,
+            certificateId: certificate.certificateId,
+            nombre: certificate.user.name,
+            curso: certificate.course.title,
+            fecha: certificate.completionDate.toISOString().split('T')[0],
+            hash: certificate.hash,
+            firebaseId: certificate.firebaseId,
+          }
+        });
+      }
+
+      res.status(404).json({ valid: false, error: "Certificate not found" });
+    } catch (error) {
+      console.error('Firebase verification error:', error);
+      res.status(500).json({ error: "Verification failed" });
     }
   });
 

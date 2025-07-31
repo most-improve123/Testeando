@@ -265,6 +265,15 @@ export class MemStorage implements IStorage {
     return updatedCertificate;
   }
 
+  async updateCertificateHash(id: number, hash: string): Promise<boolean> {
+    const certificate = this.certificates.get(id);
+    if (!certificate) return false;
+    
+    certificate.hash = hash;
+    this.certificates.set(id, certificate);
+    return true;
+  }
+
   async deleteCertificate(id: number): Promise<boolean> {
     return this.certificates.delete(id);
   }
