@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import GraduateDashboard from "@/pages/graduate-dashboard";
 import Verifier from "@/pages/verifier";
+import VerifierFirebase from "@/pages/verifier-firebase";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/graduate" component={GraduateDashboard} />
       <Route path="/verifier" component={Verifier} />
       <Route path="/verify/:certificateId" component={Verifier} />
+      <Route path="/verifier-firebase" component={VerifierFirebase} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

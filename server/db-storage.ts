@@ -138,6 +138,11 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async updateCertificateHash(id: number, hash: string): Promise<boolean> {
+    const result = await db.update(certificates).set({ hash }).where(eq(certificates.id, id));
+    return result.rowCount > 0;
+  }
+
   async deleteCertificate(id: number): Promise<boolean> {
     const result = await db.delete(certificates).where(eq(certificates.id, id));
     return result.rowCount > 0;

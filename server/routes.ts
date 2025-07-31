@@ -294,19 +294,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save to Firebase when PDF is downloaded
       try {
+        // Generate hash if not exists
+        let certHash = certificate.hash;
+        if (!certHash || certHash.startsWith('temp_hash_')) {
+          const hashData = `${user.name}|${course.title}|${certificate.completionDate.toISOString().split('T')[0]}|${certificate.certificateId}`;
+          certHash = crypto.createHash('sha256').update(hashData).digest('hex');
+          
+          // Update the database with the real hash
+          await storage.updateCertificateHash(certificate.id, certHash);
+        }
+
         const firebaseCertificate = {
           id: certificate.certificateId,
           certificateId: certificate.certificateId,
           nombre: user.name,
           curso: course.title,
           fecha: certificate.completionDate.toISOString().split('T')[0],
-          hash: certificate.hash,
+          hash: certHash,
           userId: certificate.userId,
           courseId: certificate.courseId,
         };
 
-        // Import Firebase functions dynamically to avoid issues
-        const { saveCertificateToFirebase } = await import('../client/src/lib/firebase.js');
+        const { saveCertificateToFirebase } = await import('./services/firebase-service.js');
         await saveCertificateToFirebase(firebaseCertificate);
         console.log(`Certificate ${certificate.certificateId} saved to Firebase on download`);
       } catch (firebaseError) {

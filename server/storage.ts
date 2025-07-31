@@ -23,6 +23,7 @@ export interface IStorage {
   getAllCertificates(): Promise<CertificateWithDetails[]>;
   createCertificate(certificate: InsertCertificate): Promise<Certificate>;
   updateCertificate(id: number, certificate: Partial<InsertCertificate>): Promise<Certificate>;
+  updateCertificateHash(id: number, hash: string): Promise<boolean>;
   deleteCertificate(id: number): Promise<boolean>;
 
   // Magic Link operations
